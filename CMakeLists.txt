@@ -41,11 +41,68 @@ option(LEVELDB_SUPPORT_LEGACY_ZLIB_ENUM "Legacy Zlib Support" OFF)
 include(CheckIncludeFile)
 check_include_file("unistd.h" HAVE_UNISTD_H)
 
+include(FetchContent)
+
+set(_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
+
+# Add crc32c
+set(CRC32C_BUILD_TESTS OFF)
+set(CRC32C_BUILD_BENCHMARKS OFF)
+set(CRC32C_USE_GLOG OFF)
+set(CRC32C_INSTALL OFF)
+FetchContent_Declare(
+  Crc32c
+  GIT_REPOSITORY https://github.com/google/crc32c.git
+  GIT_TAG        2bbb3be42e20a0e6c0f7b39dc07dc863d9ffbc07
+)
+FetchContent_MakeAvailable(Crc32c)
+
+# Add snappy
+set(SNAPPY_BUILD_TESTS OFF)
+set(SNAPPY_BUILD_BENCHMARKS OFF)
+set(SNAPPY_INSTALL OFF)
+FetchContent_Declare(
+  Snappy
+  GIT_REPOSITORY https://github.com/google/snappy.git
+  GIT_TAG        6af9287fbdb913f0794d0148c6aa43b58e63c8e3
+)
+FetchContent_MakeAvailable(Snappy)
+
+# Add zstd
+set(ZSTD_BUILD_STATIC ON)
+set(ZSTD_BUILD_SHARED OFF)
+set(ZSTD_BUILD_PROGRAMS  OFF)
+set(ZSTD_BUILD_TESTS OFF)
+set(ZSTD_BUILD_CONTRIB OFF)
+set(ZSTD_BUILD_EXAMPLES OFF)
+set(ZSTD_LEGACY_SUPPORT OFF)
+FetchContent_Declare(
+    zstd
+    URL "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    SOURCE_SUBDIR build/cmake
+)
+FetchContent_MakeAvailable(zstd)
+
+# Add zlib
+set(ZLIB_BUILD_EXAMPLES OFF)
+set(ZLIB_CONST ON)
+FetchContent_Declare(
+  zlib
+  GIT_REPOSITORY https://github.com/madler/zlib.git
+  GIT_TAG        51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
+)
+FetchContent_MakeAvailable(zlib)
+target_compile_definitions(zlibstatic PUBLIC ZLIB_CONST)
+
+set(BUILD_SHARED_LIBS ${_BUILD_SHARED_LIBS})
+
 include(CheckLibraryExists)
-check_library_exists(crc32c crc32c_value "" HAVE_CRC32C)
-check_library_exists(snappy snappy_compress "" HAVE_SNAPPY)
-check_library_exists(zstd zstd_compress "" HAVE_ZSTD)
-check_library_exists(zlib deflate "" HAVE_ZLIB)
+set(HAVE_CRC32C ON)
+set(HAVE_SNAPPY ON)
+set(HAVE_ZSTD ON)
+set(HAVE_ZLIB ON)
 check_library_exists(tcmalloc malloc "" HAVE_TCMALLOC)
 
 include(CheckCXXSymbolExists)
@@ -289,18 +346,10 @@ if(HAVE_CLANG_THREAD_SAFETY)
       -Werror -Wthread-safety)
 endif(HAVE_CLANG_THREAD_SAFETY)
 
-if(HAVE_CRC32C)
-  target_link_libraries(leveldb crc32c)
-endif(HAVE_CRC32C)
-if(HAVE_SNAPPY)
-  target_link_libraries(leveldb snappy)
-endif(HAVE_SNAPPY)
-if(HAVE_ZSTD)
-  target_link_libraries(leveldb zstd)
-endif(HAVE_ZSTD)
-if(HAVE_ZLIB)
-  target_link_libraries(leveldb zlib)
-endif(HAVE_ZLIB)
+target_link_libraries(leveldb crc32c)
+target_link_libraries(leveldb snappy)
+target_link_libraries(leveldb libzstd_static)
+target_link_libraries(leveldb zlibstatic)
 if(HAVE_TCMALLOC)
   target_link_libraries(leveldb tcmalloc)
 endif(HAVE_TCMALLOC)
