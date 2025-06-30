@@ -44,13 +44,13 @@ check_include_file("unistd.h" HAVE_UNISTD_H)
 include(FetchContent)
 
 set(_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # Add crc32c
-set(CRC32C_BUILD_TESTS OFF)
-set(CRC32C_BUILD_BENCHMARKS OFF)
-set(CRC32C_USE_GLOG OFF)
-set(CRC32C_INSTALL OFF)
+set(CRC32C_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(CRC32C_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+set(CRC32C_USE_GLOG OFF CACHE BOOL "" FORCE)
+set(CRC32C_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
   Crc32c
   GIT_REPOSITORY https://github.com/google/crc32c.git
@@ -59,9 +59,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Crc32c)
 
 # Add snappy
-set(SNAPPY_BUILD_TESTS OFF)
-set(SNAPPY_BUILD_BENCHMARKS OFF)
-set(SNAPPY_INSTALL OFF)
+set(SNAPPY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SNAPPY_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+set(SNAPPY_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
   Snappy
   GIT_REPOSITORY https://github.com/google/snappy.git
@@ -70,13 +70,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Snappy)
 
 # Add zstd
-set(ZSTD_BUILD_STATIC ON)
-set(ZSTD_BUILD_SHARED OFF)
-set(ZSTD_BUILD_PROGRAMS  OFF)
-set(ZSTD_BUILD_TESTS OFF)
-set(ZSTD_BUILD_CONTRIB OFF)
-set(ZSTD_BUILD_EXAMPLES OFF)
-set(ZSTD_LEGACY_SUPPORT OFF)
+set(ZSTD_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_PROGRAMS  OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ZSTD_LEGACY_SUPPORT OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     zstd
     URL "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
@@ -86,8 +86,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(zstd)
 
 # Add zlib
-set(ZLIB_BUILD_EXAMPLES OFF)
-set(ZLIB_CONST ON)
+set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
   zlib
   GIT_REPOSITORY https://github.com/madler/zlib.git
@@ -96,13 +95,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(zlib)
 target_compile_definitions(zlibstatic PUBLIC ZLIB_CONST)
 
-set(BUILD_SHARED_LIBS ${_BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS ${_BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
 
 include(CheckLibraryExists)
-set(HAVE_CRC32C ON)
-set(HAVE_SNAPPY ON)
-set(HAVE_ZSTD ON)
-set(HAVE_ZLIB ON)
+set(HAVE_CRC32C ON CACHE BOOL "" FORCE)
+set(HAVE_SNAPPY ON CACHE BOOL "" FORCE)
+set(HAVE_ZSTD ON CACHE BOOL "" FORCE)
+set(HAVE_ZLIB ON CACHE BOOL "" FORCE)
 check_library_exists(tcmalloc malloc "" HAVE_TCMALLOC)
 
 include(CheckCXXSymbolExists)
