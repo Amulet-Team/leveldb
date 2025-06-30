@@ -34,6 +34,7 @@ option(LEVELDB_BUILD_UTILS "Build LevelDB's utils" ON)
 option(LEVELDB_BUILD_TESTS "Build LevelDB's unit tests" ON)
 option(LEVELDB_BUILD_BENCHMARKS "Build LevelDB's benchmarks" ON)
 option(LEVELDB_INSTALL "Install LevelDB's header and library" ON)
+option(LEVELDB_DISABLE_EXCEPTIONS "Disable Exceptions" ON)
 option(LEVELDB_DISABLE_RTTI "Disable Rtti" ON)
 option(LEVELDB_SUPPORT_LEGACY_ZLIB_ENUM "Legacy Zlib Support" OFF)
 
@@ -58,9 +59,11 @@ check_cxx_symbol_exists(F_FULLFSYNC "fcntl.h" HAVE_FULLFSYNC)
 check_cxx_symbol_exists(O_CLOEXEC "fcntl.h" HAVE_O_CLOEXEC)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # Disable C++ exceptions.
-  add_compile_options(/EHs-c-)
-  add_definitions(-D_HAS_EXCEPTIONS=0)
+  if(LEVELDB_DISABLE_EXCEPTIONS)
+    # Disable C++ exceptions.
+    add_compile_options(/EHs-c-)
+    add_definitions(-D_HAS_EXCEPTIONS=0)
+  endif(LEVELDB_DISABLE_EXCEPTIONS)
 
   if(LEVELDB_DISABLE_RTTI)
     # Disable RTTI.
@@ -73,7 +76,9 @@ else(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   endif(NOT CMAKE_C_FLAGS MATCHES "-Wstrict-prototypes")
 
   # Disable C++ exceptions.
-  add_compile_options(-fno-exceptions)
+  if(LEVELDB_DISABLE_EXCEPTIONS)
+    add_compile_options(-fno-exceptions)
+  endif(LEVELDB_DISABLE_EXCEPTIONS)
 
   if(LEVELDB_DISABLE_RTTI)
     # Disable RTTI.
