@@ -899,17 +899,19 @@ Status VersionSet::Recover(bool* save_manifest) {
     }
   }
   
-  const size_t size = current.size();
-  if (size == 0 || (current[size - 1] != '\n' && current[size - 1] != '\r')) {
-    return Status::Corruption("CURRENT file does not end with newline");
+  const size_t maxSize = current.size();
+  size_t size = 0;
+  // find the first non-printable character (eg null, carriage return or newline)
+  for (size = 0; size < maxSize; size++){
+    if (current[size] < 32)
+        break;
   }
-
-  int resizeSize = 1;
-  if (size >= 2 && current[size - 2] == '\r') {
-    resizeSize = 2;
+  current.resize(size);
+  if (size == 0) {
+    if (maxSize != 0)
+        return Status::NotSupported("CURRENT file did not contain a valid manifest name. Marketplace worlds are not supported.");
+    return Status::Corruption("CURRENT file is empty");
   }
-
-  current.resize(size - resizeSize);
 
   std::string dscname = dbname_ + "/" + current;
   SequentialFile* file;
