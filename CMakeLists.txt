@@ -30,6 +30,7 @@ else (WIN32)
   set(LEVELDB_PLATFORM_NAME LEVELDB_PLATFORM_POSIX)
 endif (WIN32)
 
+option(LEVELDB_BUILD_UTILS "Build LevelDB's utils" ON)
 option(LEVELDB_BUILD_TESTS "Build LevelDB's unit tests" ON)
 option(LEVELDB_BUILD_BENCHMARKS "Build LevelDB's benchmarks" ON)
 option(LEVELDB_INSTALL "Install LevelDB's header and library" ON)
@@ -301,10 +302,12 @@ endif(HAVE_TCMALLOC)
 find_package(Threads REQUIRED)
 target_link_libraries(leveldb Threads::Threads)
 
-add_executable(leveldbutil
-  "db/leveldbutil.cc"
-)
-target_link_libraries(leveldbutil leveldb)
+if(LEVELDB_BUILD_UTILS)
+  add_executable(leveldbutil
+    "db/leveldbutil.cc"
+  )
+  target_link_libraries(leveldbutil leveldb)
+endif(LEVELDB_BUILD_UTILS)
 
 if(LEVELDB_BUILD_TESTS)
   enable_testing()
