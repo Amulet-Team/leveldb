@@ -588,7 +588,7 @@ class WindowsEnv : public Env {
     *lock = nullptr;
     Status result;
     ScopedHandle handle = ::CreateFileA(
-        filename.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
+        filename.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
         /*lpSecurityAttributes=*/nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL,
         nullptr);
     if (!handle.is_valid()) {
