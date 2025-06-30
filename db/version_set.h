@@ -21,6 +21,7 @@
 
 #include "db/dbformat.h"
 #include "db/version_edit.h"
+#include "leveldb/env.h"
 #include "port/port.h"
 #include "port/thread_annotations.h"
 
@@ -300,6 +301,7 @@ class VersionSet {
   const InternalKeyComparator icmp_;
   uint64_t next_file_number_;
   uint64_t manifest_file_number_;
+  FileLock* current_lock_;
   uint64_t last_sequence_;
   uint64_t log_number_;
   uint64_t prev_log_number_;  // 0 or backing store for memtable being compacted

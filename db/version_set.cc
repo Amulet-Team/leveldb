@@ -744,6 +744,7 @@ VersionSet::VersionSet(const std::string& dbname, const Options* options,
       icmp_(*cmp),
       next_file_number_(2),
       manifest_file_number_(0),  // Filled by Recover()
+      current_lock_(NULL),
       last_sequence_(0),
       log_number_(0),
       prev_log_number_(0),
@@ -759,6 +760,9 @@ VersionSet::~VersionSet() {
   assert(dummy_versions_.next_ == &dummy_versions_);  // List must be empty
   delete descriptor_log_;
   delete descriptor_file_;
+  if (current_lock_ != nullptr) {
+    env_->UnlockFile(current_lock_);
+  }
 }
 
 void VersionSet::AppendVersion(Version* v) {
@@ -805,6 +809,7 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
   // a temporary file that contains a snapshot of the current version.
   std::string new_manifest_file;
   Status s;
+  Status ls;
   if (descriptor_log_ == nullptr) {
     // No reason to unlock *mu here since we only hit this path in the
     // first call to LogAndApply (when opening the database).
@@ -837,7 +842,14 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
     // If we just created a new descriptor file, install it by writing a
     // new CURRENT file that points to it.
     if (s.ok() && !new_manifest_file.empty()) {
+      if (current_lock_ != nullptr) {
+        env_->UnlockFile(current_lock_);
+        current_lock_ = nullptr;
+      }
       s = SetCurrentFile(env_, dbname_, manifest_file_number_);
+      if (s.ok()) {
+        ls = env_->LockFile(CurrentFileName(dbname_), &current_lock_);
+      }
     }
 
     mu->Lock();
@@ -859,6 +871,9 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
     }
   }
 
+  if (!ls.ok()){
+      return ls;
+  }
   return s;
 }
 
@@ -876,6 +891,14 @@ Status VersionSet::Recover(bool* save_manifest) {
   if (!s.ok()) {
     return s;
   }
+  
+  if (current_lock_ == nullptr) {
+    s = env_->LockFile(CurrentFileName(dbname_), &current_lock_);
+    if (!s.ok()) {
+      return s;
+    }
+  }
+  
   const size_t size = current.size();
   if (size == 0 || (current[size - 1] != '\n' && current[size - 1] != '\r')) {
     return Status::Corruption("CURRENT file does not end with newline");
