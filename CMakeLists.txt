@@ -114,8 +114,10 @@ include_directories(
 )
 
 if(BUILD_SHARED_LIBS)
-  # Only export LEVELDB_EXPORT symbols from the shared library.
-  add_compile_options(-fvisibility=hidden)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Only export LEVELDB_EXPORT symbols from the shared library.
+    add_compile_options(-fvisibility=hidden)
+  endif(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif(BUILD_SHARED_LIBS)
 
 # Must be included before CMAKE_INSTALL_INCLUDEDIR is used.
